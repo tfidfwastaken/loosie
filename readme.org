@@ -1,0 +1,3 @@
+* loosie
+
+This project is came out of a need of mine where I wanted to quickly share html page links (and other stuff) in a google-drive like fashion.

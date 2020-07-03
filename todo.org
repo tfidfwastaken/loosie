@@ -1,0 +1,12 @@
+*** Where to store the data???
+    - some db on heroku?
+    - drive?
+    - private git repo?
+*** End points
+**** =/upload=
+     - Has a form to put in my file
+     - Generates a url for that file, stores in db
+     - Creates a pass phrase for the file
+**** =/show=
+     - asks my pass phrase
+     - lists all my files uploaded with url and pass phrase
