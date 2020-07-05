@@ -11,12 +11,11 @@
          web-server/dispatch
          xml)
 
+(module+ test
+    (require rackunit))
+
 (provide interface-version)
 (define interface-version 'stateless)
-
-(define port (if (getenv "PORT")
-                 (string->number (getenv "PORT"))
-                 8080))
 
 ; render-uploader: request -> doesn't return
 (define (render-uploader request)

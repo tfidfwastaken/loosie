@@ -1,5 +1,5 @@
 *** Where to store the data???
-    - some db on heroku?
+    - some db on heroku? -----> heroku postgres looks good
     - drive?
     - private git repo?
 *** End points
@@ -10,3 +10,7 @@
 **** =/show=
      - asks my pass phrase
      - lists all my files uploaded with url and pass phrase
+*** Pending
+    - Viewer of saved files
+    - Pass phrases
+    - CSS and UX stuff
