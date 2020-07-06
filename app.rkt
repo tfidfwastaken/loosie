@@ -9,7 +9,8 @@
          web-server/servlet-env
          web-server/formlets
          web-server/dispatch
-         xml)
+         xml
+         "model.rkt")
 
 (module+ test
     (require rackunit))
@@ -44,13 +45,18 @@
 ; upload-formlet: formlet (binding?)
 (define upload-formlet
   (formlet
-   (div ,{(file-upload) . => . binds})
+   (div "Passphrase (Optional)" ,{input-string . => . pw}
+        "File to upload" ,{(file-upload) . => . binds})
    ; (formlet-process upload-formlet request)
    ; returns the file name and contents:
-   (let
-       ([fname (bytes->string/utf-8 (binding:file-filename binds))]
-        [fcontents (binding:file-content binds)])
-     (values fname fcontents))))
+   (let* ([hashed-pw (get-password-hash pw)]
+          [fname (bytes->string/utf-8 (binding:file-filename binds))]
+          [mime-type (get-mime-type fname)]
+          [fcontents (binding:file-content binds)])
+     (make-loosie #:name fname
+                  #:mime-type mime-type
+                  #:content fcontents
+                  #:passphrase hashed-pw))))
 
  ; start: request -> doesn't return
 (define (start request)
