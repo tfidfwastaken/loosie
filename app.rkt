@@ -19,12 +19,11 @@
 (define interface-version 'stateless)
 
 ; render-uploader: request -> doesn't return
-(define (render-uploader request)
+(define (render-uploader db request)
   (define (upload-handler request)
-    (define-values (fname fcontents)
+    (define loosie-data
       (formlet-process upload-formlet request))
-    (current-directory "/home/atharva/loosie/")
-    (display-to-file fcontents "test.html" #:exists 'replace)
+    (upload-file db loosie-data)
     (response/xexpr "SUCCESS"))
 
   ; renders the upload page
@@ -56,11 +55,13 @@
      (make-loosie #:name fname
                   #:mime-type mime-type
                   #:content fcontents
-                  #:passphrase hashed-pw))))
+                  #:passphrase hashed-pw
+                  #:pass-protected? (if (equal? pw "") #f #t)))))
 
  ; start: request -> doesn't return
 (define (start request)
-  (render-uploader request))
+  (define db (init-db))
+  (render-uploader db request))
 
 (serve/servlet start
                #:servlet-path "/"
