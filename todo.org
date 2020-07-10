@@ -2,15 +2,17 @@
     - some db on heroku? -----> heroku postgres looks good
     - drive?
     - private git repo?
-*** End points
+*** Functionality
 **** =/upload=
      - Has a form to put in my file
      - Generates a url for that file, stores in db
      - Creates a pass phrase for the file
-**** =/show=
+     - Generates access code
+**** =/<access_code>=
      - asks my pass phrase
      - lists all my files uploaded with url and pass phrase
 *** Pending
     - Viewer of saved files
-    - Pass phrases
+    - Passcode generation
+    - [x] Pass phrases
     - CSS and UX stuff

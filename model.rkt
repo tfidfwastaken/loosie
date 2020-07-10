@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require db database-url
+(require racket/match
+         db database-url
          deta
          crypto
          crypto/libcrypto
@@ -17,7 +18,7 @@
 (define-schema loosie
   ([id id/f #:primary-key #:auto-increment]
    [name string/f #:contract non-empty-string?]
-   [mime-type string/f #:contract non-empty-string? #:wrapper string-upcase]
+   [mime-type symbol/f]
    [content binary/f]
    [passphrase string/f]
    [pass-protected? boolean/f #:contract (or #t #f)]))
@@ -43,9 +44,12 @@
 (define (upload-file db a-loosie)
   (insert-one! db a-loosie))
 
-(define (get-mime-type filename) "text/html")
-  ; (cond
-  ;   [(regexp-match? #px"*.html" filename) "text/html"]
+(define (get-mime-type filename)
+  (match filename
+    [(pregexp #px".*\\.html?$") 'text/html]
+    [(pregexp #px".*\\.txt$") 'text/plain]
+    [(pregexp #px".*\\.pdf$") 'application/pdf]
+    [_ 'unknown]))
     
 
 (define (get-password-hash pw)

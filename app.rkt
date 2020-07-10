@@ -20,12 +20,6 @@
 
 ; render-uploader: request -> doesn't return
 (define (render-uploader db request)
-  (define (upload-handler request)
-    (define loosie-data
-      (formlet-process upload-formlet request))
-    (upload-file db loosie-data)
-    (response/xexpr "SUCCESS"))
-
   ; renders the upload page
   (define (response-generator embed/url)
     (response/xexpr
@@ -39,7 +33,32 @@
               ,@(formlet-display upload-formlet)
               (input ([type "submit"] [value "Upload"])))))))
 
+  (define (upload-handler request)
+    (render-upload-success db request))
+
 (send/suspend/dispatch response-generator))
+
+; render-upload-success -> doesn't return
+(define (render-upload-success db request)
+  (define (response-generator embed/url)
+    (define loosie-data
+      (formlet-process upload-formlet request))
+    (upload-file db loosie-data)
+    (response/xexpr
+     `(html
+       (head (title "loosie - success"))
+       (body (h1 "Success!")
+             ; (p ,(string-append "Your link is: "
+             ;                    (access-code->url (loosie-code loosie-data))))
+             (p ,(string-append "Your passphrase is: "
+                                (loosie-passphrase loosie-data)))
+             (a ([href ,(embed/url home-handler)]) "« Back to home")))))
+
+  (define (home-handler request)
+    (render-uploader db request))
+
+  (send/suspend/dispatch response-generator))
+
 
 ; upload-formlet: formlet (binding?)
 (define upload-formlet
