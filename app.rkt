@@ -48,17 +48,18 @@
      `(html
        (head (title "loosie - success"))
        (body (h1 "Success!")
-             ; (p ,(string-append "Your link is: "
-             ;                    (access-code->url (loosie-code loosie-data))))
-             (p ,(string-append "Your passphrase is: "
-                                (loosie-passphrase loosie-data)))
+             (p ,(string-append "Your link is: "
+                                (access-code->url-string
+                                 (loosie-access-code loosie-data) request)))
              (a ([href ,(embed/url home-handler)]) "« Back to home")))))
-
+  
+  (define (access-code->url-string code request)
+    (string-append app-url "/" code))
+  
   (define (home-handler request)
     (render-uploader db request))
 
   (send/suspend/dispatch response-generator))
-
 
 ; upload-formlet: formlet (binding?)
 (define upload-formlet
@@ -70,11 +71,13 @@
    (let* ([hashed-pw (get-password-hash pw)]
           [fname (bytes->string/utf-8 (binding:file-filename binds))]
           [mime-type (get-mime-type fname)]
+          [access-code (make-access-code)]
           [fcontents (binding:file-content binds)])
-     (make-loosie #:name fname
-                  #:mime-type mime-type
-                  #:content fcontents
-                  #:passphrase hashed-pw
+     (make-loosie #:name            fname
+                  #:mime-type       mime-type
+                  #:content         fcontents
+                  #:access-code     access-code
+                  #:passphrase      hashed-pw
                   #:pass-protected? (if (equal? pw "") #f #t)))))
 
  ; start: request -> doesn't return

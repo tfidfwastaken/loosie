@@ -1,18 +1,17 @@
 *** Where to store the data???
     - some db on heroku? -----> heroku postgres looks good
-    - drive?
-    - private git repo?
+    - +drive?+
+    - +private git repo?+
 *** Functionality
 **** =/upload=
-     - Has a form to put in my file
-     - Generates a url for that file, stores in db
-     - Creates a pass phrase for the file
-     - Generates access code
+     - [x] Has a form to put in my file
+     - [x] Generates a url for that file, stores in db
+     - [x] Creates a pass phrase for the file
+     - [x] Generates access code
 **** =/<access_code>=
      - asks my pass phrase
      - lists all my files uploaded with url and pass phrase
 *** Pending
     - Viewer of saved files
-    - Passcode generation
     - [x] Pass phrases
     - CSS and UX stuff

@@ -3,13 +3,15 @@
 (require racket/match
          db database-url
          deta
+         net/base64
          crypto
          crypto/libcrypto
          racket/string)
 
-(provide init-db port
+(provide init-db port app-url
          (schema-out loosie)
          upload-file get-mime-type
+         make-access-code
          get-password-hash verify-password)
 
 (crypto-factories (list libcrypto-factory))
@@ -20,6 +22,7 @@
    [name string/f #:contract non-empty-string?]
    [mime-type symbol/f]
    [content binary/f]
+   [access-code string/f #:contract non-empty-string?]
    [passphrase string/f]
    [pass-protected? boolean/f #:contract (or #t #f)]))
 
@@ -41,16 +44,28 @@
                  (string->number (getenv "PORT"))
                  8080))
 
+(define app-url (if (getenv "APP_URL")
+                    (getenv "APP_URL")
+                    "http://localhost:8080"))
+
 (define (upload-file db a-loosie)
   (insert-one! db a-loosie))
 
 (define (get-mime-type filename)
   (match filename
     [(pregexp #px".*\\.html?$") 'text/html]
+    [(pregexp #px".*\\.md$") 'text/markdown]
     [(pregexp #px".*\\.txt$") 'text/plain]
     [(pregexp #px".*\\.pdf$") 'application/pdf]
     [_ 'unknown]))
-    
+
+; creates url-safe access code
+(define (make-access-code)
+  (let* ([b64-code (base64-encode (crypto-random-bytes 9) #"")]
+         [no-plus (regexp-replace #rx"\\+" b64-code "-")]
+         [no-slash (regexp-replace #rx"/" no-plus "_")]
+         [no-equal (regexp-replace #rx"=" no-slash "*")])
+    (bytes->string/utf-8 no-equal)))
 
 (define (get-password-hash pw)
   (pwhash '(pbkdf2 hmac sha256)
