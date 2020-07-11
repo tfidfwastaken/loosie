@@ -15,7 +15,9 @@
          (schema-out loosie)
          upload-file get-mime-type
          make-access-code get-file-data
-         get-password-hash password-matches?)
+         get-password-hash
+         password-matches?
+         valid-password?)
 
 (crypto-factories (list libcrypto-factory))
 
@@ -73,7 +75,7 @@
     [(pregexp #px".*\\.md$") #"text/markdown"]
     [(pregexp #px".*\\.txt$") #"text/plain"]
     [(pregexp #px".*\\.pdf$") #"application/pdf"]
-    [_ 'unknown]))
+    [_ #"unknown"]))
 
 ; creates url-safe access code
 (define (make-access-code)

@@ -20,7 +20,7 @@
 (define interface-version 'stateless)
 
 ; render-uploader: request -> doesn't return
-(define (render-uploader db request)
+(define (render-uploader db #:status [status ""] request)
   ; renders the upload page
   (define (response-generator embed/url)
     (response/xexpr
@@ -32,26 +32,38 @@
                [method "POST"]
                [enctype "multipart/form-data"])
               ,@(formlet-display upload-formlet)
-              (input ([type "submit"] [value "Upload"])))))))
+              (input ([type "submit"] [value "Upload"])))
+             (div ([class "status"]) ,status)))))
 
   (define (upload-handler request)
-    (render-upload-success db request))
-
+    (define loosie-data
+      (formlet-process upload-formlet request))
+    (match loosie-data
+      ['invalid-password
+       (let ([failure-msg
+              (string-append "Password must be between 8 and 32 characters"
+                             " and can only contain numbers, letters and"
+                             " the following special characters: !@#$%^&*()")])
+         (render-uploader db #:status failure-msg request))]
+      ['no-upload
+       (let ([failure-msg "Please upload a file."])
+         (render-uploader db #:status failure-msg request))]
+      [else
+       (render-upload-success db loosie-data request)]))
+       
 (send/suspend/dispatch response-generator))
 
 ; render-upload-success -> doesn't return
-(define (render-upload-success db request)
+(define (render-upload-success db loosie request)
   (define (response-generator embed/url)
-    (define loosie-data
-      (formlet-process upload-formlet request))
-    (upload-file db loosie-data)
+    (upload-file db loosie)
     (response/xexpr
      `(html
        (head (title "loosie - success"))
        (body (h1 "Success!")
              (p ,(string-append "Your link is: "
                                 (access-code->url-string
-                                 (loosie-access-code loosie-data) request)))
+                                 (loosie-access-code loosie) request)))
              (a ([href ,(embed/url home-handler)]) "« Back to home")))))
   
   (define (access-code->url-string code request)
@@ -74,12 +86,16 @@
           [mime-type (get-mime-type fname)]
           [access-code (make-access-code)]
           [fcontents (binding:file-content binds)])
-     (make-loosie #:name            fname
-                  #:mime-type       mime-type
-                  #:content         fcontents
-                  #:access-code     access-code
-                  #:passphrase      hashed-pw
-                  #:pass-protected? (if (equal? pw "") #f #t)))))
+     (cond
+       [(equal? fname "") 'no-upload]
+       [(not (valid-password? pw)) 'invalid-password]
+       [else 
+        (make-loosie #:name            fname
+                     #:mime-type       mime-type
+                     #:content         fcontents
+                     #:access-code     access-code
+                     #:passphrase      hashed-pw
+                     #:pass-protected? (if (equal? pw "") #f #t))]))))
 
 (define passphrase-entry
   (formlet
