@@ -1,3 +1,46 @@
 * loosie
 
-This project is came out of a need of mine where I wanted to quickly share html page links (and other stuff) in a google-drive like fashion.
+Loosie is a convenient on-the-web document sharer.
+
+Just upload an html, plaintext or pdf file and you'll receive a shareable link. These links will display the file directly on the browser without offering a file download (Support for automatic markdown file sharing shall be added later).
+
+This project is came out of a need of mine where I wanted to quickly share loose html documents as links in a google-drive like fashion.
+
+This has been designed to be self-deployable and I highly recommend using it in a decentralized fashion.
+
+** Deploying your own loosie instance
+
+I am providing instructions for Heroku (especially because it's free), but this application works anywhere as long as you can install [[https://download.racket-lang.org/][Racket]] and [[https://www.postgresql.org/download/][PostgreSQL]], and set the following environment variables:
+#+BEGIN_EXAMPLE
+DATABASE_URL=<your postgresql database url>
+APP_URL=<your webapp url (without trailing slash)>
+#+END_EXAMPLE
+
+*** To deploy on Heroku
+
+- Create your heroku account and create a new app (let's say you picked the name =foosie=)
+- Clone this repository
+#+BEGIN_EXAMPLE
+git clone https://github.com/tfidfwastaken/loosie.git && cd loosie
+#+END_EXAMPLE
+- Link this repository to your app
+#+BEGIN_EXAMPLE
+heroku git:remote -a foosie
+#+END_EXAMPLE
+- Set up the Racket buildpack and Postgres addon on Heroku
+#+BEGIN_EXAMPLE
+heroku buildpacks:set https://github.com/lexi-lambda/heroku-buildpack-racket
+heroku addons:create heroku-postgresql:hobby-dev
+#+END_EXAMPLE
+- Set the environment variables
+#+BEGIN_EXAMPLE
+heroku config:set RACKET_VERSION=7.7
+heroku config:set APP_URL=https://foosie.herokuapp.com
+#+END_EXAMPLE
+
+And in five steps you have setup your own personal file sharing instance!
+
+**** Example instance
+https://loosi.herokuapp.com/ (Currently looks like stale socks because I have not added CSS yet)
+
+Here's an example of a shareable link: https://loosi.herokuapp.com/QdchQBBtVHNr (html version of this readme)
