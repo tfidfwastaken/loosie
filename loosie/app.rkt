@@ -90,7 +90,7 @@
           [fcontents (binding:file-content binds)])
      (cond
        [(equal? fname "") 'no-upload]
-       [(not (valid-password? pw)) 'invalid-password]
+       [(not (or (equal? pw "") (valid-password? pw))) 'invalid-password]
        [else 
         (make-loosie #:name            fname
                      #:mime-type       mime-type
