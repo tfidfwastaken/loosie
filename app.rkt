@@ -2,6 +2,7 @@
 
 (require racket/list
          racket/file
+         racket/match
 	 web-server/http
 	 web-server/stuffers
 	 web-server/page
@@ -80,25 +81,75 @@
                   #:passphrase      hashed-pw
                   #:pass-protected? (if (equal? pw "") #f #t)))))
 
+(define passphrase-entry
+  (formlet
+   (div "Enter passphrase to access: " ,{input-string . => . pw})
+   pw))
+
  ; start-upload: request -> doesn't return
 (define (start-upload request)
   (define db (init-db))
   (render-uploader db request))
 
-(define (view-content request)
+(define (file-not-found-handler request)
+  (response/xexpr
+   `(html
+     (head (title "loosie not found")
+           (body (h1 "The loosie you requested does not exist")
+                 (p (a ([href "/"]) "« go home")))))))
+
+; displays retrieved loosie
+(define (render-loosie loosie request)
+  (define mime-type (loosie-mime-type loosie))
+  (response/output
+   (λ (op) (write-bytes (loosie-content loosie) op))
+   #:code 200
+   #:mime-type (if (equal? mime-type 'unknown) #""
+                   mime-type)))
+
+(define (render-pass-form #:status [status ""] loosie request)
+  (define (response-generator embed/url)
+    (response/xexpr 
+     `(html 
+       (head (title "loosie - verify"))
+       (body (h1 "LOOSIE")
+             (form 
+              ([action ,(embed/url password-submit-handler)]
+               [method "POST"]
+               [enctype "multipart/form-data"])
+              ,@(formlet-display passphrase-entry)
+              (input ([type "submit"] [value "Submit"])))
+             (div ([class "status"]) ,status)))))
+
+  (define (password-submit-handler request)
+    (define pw (formlet-process passphrase-entry request))
+    (define pwh (loosie-passphrase loosie))
+    (cond
+      [(password-matches? pw pwh) (render-loosie loosie request)]
+      [else
+       (let ([failed-msg "Verification failed. Try again."])
+         (render-pass-form #:status failed-msg loosie request))]))
+
+    (send/suspend/dispatch response-generator))
+
+
+; get-content: request -> doesn't return
+(define (get-content request)
   (define db (init-db))
   (define access-code
     (path/param-path (car (url-path (request-uri request)))))
-  (define content (get-content db access-code))
-  (response/output
-   (λ (op) (write-bytes content op))
-   #:code 200))
+  (define loosie (get-file-data db access-code))
+  (if (not loosie) (file-not-found-handler request)
+      (match (loosie-pass-protected? loosie)
+        [#f (render-loosie loosie request)]
+        [#t (render-pass-form loosie request)]
+        [_ (error "should never get here. if it did then i cri")])))
 
 ; dispatches based on request
 (define-values (start reverse-uri)
   (dispatch-rules
    [("") #:method "get" start-upload]
-   [else view-content]))
+   [else get-content]))
 
 (serve/servlet start
                #:servlet-path "/"

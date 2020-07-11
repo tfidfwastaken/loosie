@@ -14,8 +14,8 @@
 (provide init-db port app-url
          (schema-out loosie)
          upload-file get-mime-type
-         make-access-code get-content
-         get-password-hash verify-password)
+         make-access-code get-file-data
+         get-password-hash password-matches?)
 
 (crypto-factories (list libcrypto-factory))
 
@@ -23,11 +23,11 @@
 (define-schema loosie
   ([id id/f #:primary-key #:auto-increment]
    [name string/f #:contract non-empty-string?]
-   [mime-type symbol/f]
+   [mime-type binary/f]
    [content binary/f]
    [access-code string/f #:contract non-empty-string? #:unique]
    [passphrase string/f]
-   [pass-protected? boolean/f #:contract (or #t #f)]))
+   [pass-protected? boolean/f]))
 
 (define (init-db)
  ; make-pg-connection : (-> connection)
@@ -54,20 +54,25 @@
 (define (upload-file db a-loosie)
   (insert-one! db a-loosie))
 
-(define (get-content db access-code)
-  (define content
-    (query-value db (~> (from loosie #:as l)
-                        (select l.content)
-                        (where (= l.access-code ,access-code)))))
-  content)
+(define (get-file-data db access-code)
+  (define query-vec
+    (query-maybe-row db (~> (from loosie #:as l)
+                            (where (= l.access-code ,access-code)))))
+  (if (equal? query-vec #f) #f
+      (make-loosie #:name            (vector-ref query-vec 1)
+                   #:mime-type       (vector-ref query-vec 2)
+                   #:content         (vector-ref query-vec 3)
+                   #:access-code     access-code
+                   #:passphrase      (vector-ref query-vec 5)
+                   #:pass-protected? (vector-ref query-vec 6))))
 
 
 (define (get-mime-type filename)
   (match filename
-    [(pregexp #px".*\\.html?$") 'text/html]
-    [(pregexp #px".*\\.md$") 'text/markdown]
-    [(pregexp #px".*\\.txt$") 'text/plain]
-    [(pregexp #px".*\\.pdf$") 'application/pdf]
+    [(pregexp #px".*\\.html?$") #"text/html"]
+    [(pregexp #px".*\\.md$") #"text/markdown"]
+    [(pregexp #px".*\\.txt$") #"text/plain"]
+    [(pregexp #px".*\\.pdf$") #"application/pdf"]
     [_ 'unknown]))
 
 ; creates url-safe access code
@@ -81,7 +86,7 @@
           (if (bytes? pw) pw (string->bytes/utf-8 pw))
           '((iterations 20000))))
 
-(define (verify-password pw pwh)
+(define (password-matches? pw pwh)
   (pwhash-verify #f 
                  (if (bytes? pw) pw (string->bytes/utf-8 pw))
                  pwh))
@@ -92,17 +97,17 @@
 (module+ test
   (test-case
       "checks if mime-types match correctly"
-    (check-equal? 'text/html
+    (check-equal? #"text/html"
                   (get-mime-type "abcd.html"))
-    (check-equal? 'text/html
+    (check-equal? #"text/html"
                   (get-mime-type "ble/h.html"))
-    (check-equal? 'text/html
+    (check-equal? #"text/html"
                   (get-mime-type "bleh.htm"))
-    (check-equal? 'text/markdown
+    (check-equal? #"text/markdown"
                   (get-mime-type "ghanshyam.md"))
-    (check-equal? 'text/plain
+    (check-equal? #"text/plain"
                   (get-mime-type "baburao.txt"))
-    (check-equal? 'application/pdf
+    (check-equal? #"application/pdf"
                   (get-mime-type "aman_rashid.pdf"))
     (check-equal? 'unknown
                   (get-mime-type "freedom is an illusion")))
@@ -130,5 +135,5 @@
   (test-case
       "check password verification"
     (check-true
-     (verify-password "a password"
-                      (get-password-hash "a password")))))
+     (password-matches? "a password"
+                        (get-password-hash "a password")))))
