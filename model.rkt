@@ -2,7 +2,7 @@
 
 (require racket/match
          db database-url
-         deta
+         deta threading
          net/base64
          crypto
          crypto/libcrypto
@@ -14,7 +14,7 @@
 (provide init-db port app-url
          (schema-out loosie)
          upload-file get-mime-type
-         make-access-code
+         make-access-code get-content
          get-password-hash verify-password)
 
 (crypto-factories (list libcrypto-factory))
@@ -25,7 +25,7 @@
    [name string/f #:contract non-empty-string?]
    [mime-type symbol/f]
    [content binary/f]
-   [access-code string/f #:contract non-empty-string?]
+   [access-code string/f #:contract non-empty-string? #:unique]
    [passphrase string/f]
    [pass-protected? boolean/f #:contract (or #t #f)]))
 
@@ -53,6 +53,14 @@
 
 (define (upload-file db a-loosie)
   (insert-one! db a-loosie))
+
+(define (get-content db access-code)
+  (define content
+    (query-value db (~> (from loosie #:as l)
+                        (select l.content)
+                        (where (= l.access-code ,access-code)))))
+  content)
+
 
 (define (get-mime-type filename)
   (match filename

@@ -80,12 +80,28 @@
                   #:passphrase      hashed-pw
                   #:pass-protected? (if (equal? pw "") #f #t)))))
 
- ; start: request -> doesn't return
-(define (start request)
+ ; start-upload: request -> doesn't return
+(define (start-upload request)
   (define db (init-db))
   (render-uploader db request))
 
+(define (view-content request)
+  (define db (init-db))
+  (define access-code
+    (path/param-path (car (url-path (request-uri request)))))
+  (define content (get-content db access-code))
+  (response/output
+   (λ (op) (write-bytes content op))
+   #:code 200))
+
+; dispatches based on request
+(define-values (start reverse-uri)
+  (dispatch-rules
+   [("") #:method "get" start-upload]
+   [else view-content]))
+
 (serve/servlet start
                #:servlet-path "/"
+               #:servlet-regexp #rx""
                #:listen-ip #f
                #:port port)
