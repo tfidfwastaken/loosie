@@ -111,7 +111,7 @@
                   (get-mime-type "baburao.txt"))
     (check-equal? #"application/pdf"
                   (get-mime-type "aman_rashid.pdf"))
-    (check-equal? 'unknown
+    (check-equal? #"unknown"
                   (get-mime-type "freedom is an illusion")))
 
   (test-case

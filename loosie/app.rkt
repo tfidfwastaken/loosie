@@ -57,13 +57,15 @@
 (define (render-upload-success db loosie request)
   (define (response-generator embed/url)
     (upload-file db loosie)
+    (define access-link
+      (access-code->url-string
+       (loosie-access-code loosie) request))
     (response/xexpr
      `(html
        (head (title "loosie - success"))
        (body (h1 "Success!")
-             (p ,(string-append "Your link is: "
-                                (access-code->url-string
-                                 (loosie-access-code loosie) request)))
+             (p "Your link is: " (a ([href 
+                                      ,access-link]) ,access-link))
              (a ([href ,(embed/url home-handler)]) "« Back to home")))))
   
   (define (access-code->url-string code request)
@@ -120,7 +122,7 @@
   (response/output
    (λ (op) (write-bytes (loosie-content loosie) op))
    #:code 200
-   #:mime-type (if (equal? mime-type 'unknown) #""
+   #:mime-type (if (equal? mime-type #"unknown") #""
                    mime-type)))
 
 (define (render-pass-form #:status [status ""] loosie request)

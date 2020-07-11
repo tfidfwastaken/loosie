@@ -1,0 +1,1 @@
+web: racket -l loosie/loosie/app
