@@ -83,6 +83,35 @@
                     (base64-encode (crypto-random-bytes 9) #""))
                    '([#rx"\\+" "-"] [#rx"/" "_"] [#rx"=" "*"])))
 
+; data, password -> cipher-data and hash table of decryption info
+(define (encrypt-data data pw)
+    (let* ([pwb (string->bytes/utf-8 pw)]
+           [dek (generate-cipher-key '(aes gcm) #:size 32)]
+           [iv (generate-cipher-iv '(aes gcm))]
+           [salt (crypto-random-bytes 32)]
+           [kek (kdf '(pbkdf2 hmac sha256) pwb salt
+                     '([iterations 100000] [key-size 32]))])
+      (define cipher-data
+        (encrypt '(aes gcm) dek iv data))
+      (define encrypted-dek
+        (encrypt '(aes gcm) kek iv dek))
+      (values cipher-data
+              (hash 'encrypted-dek encrypted-dek
+                    'salt salt
+                    'iv iv))))
+
+; cipher data, decryption hash table, password -> output data or exception
+(define (decrypt-data cipher-data wrap pw)
+    (let* ([pwb (string->bytes/utf-8 pw)]
+           [salt (hash-ref wrap 'salt)]
+           [iv (hash-ref wrap 'iv)]
+           [enc-dek (hash-ref wrap 'encrypted-dek)]
+           [kek (kdf '(pbkdf2 hmac sha256) pwb salt
+                     '([iterations 100000] [key-size 32]))]
+           [dek (decrypt '(aes gcm) kek iv enc-dek)])
+      (decrypt '(aes gcm) dek iv cipher-data)))
+
+; functions for password storage
 (define (get-password-hash pw)
   (pwhash '(pbkdf2 hmac sha256)
           (if (bytes? pw) pw (string->bytes/utf-8 pw))
