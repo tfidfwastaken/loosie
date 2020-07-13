@@ -10,8 +10,11 @@
          web-server/servlet-env
          web-server/formlets
          web-server/dispatch
+         web-server/templates
+         web-server/configuration/responders
          xml
-         "model.rkt")
+         "model.rkt"
+         "formlet.rkt")
 
 (module+ test
     (require rackunit))
@@ -23,17 +26,10 @@
 (define (render-uploader db #:status [status ""] request)
   ; renders the upload page
   (define (response-generator embed/url)
-    (response/xexpr
-     `(html 
-       (head (title "loosie"))
-       (body (h1 "LOOSIE")
-             (form 
-              ([action ,(embed/url upload-handler)]
-               [method "POST"]
-               [enctype "multipart/form-data"])
-              ,@(formlet-display upload-formlet)
-              (input ([type "submit"] [value "Upload"])))
-             (div ([class "status"]) ,status)))))
+    (response/full
+     200 #f
+     (current-seconds) TEXT/HTML-MIME-TYPE '()
+     (list (string->bytes/utf-8 (include-template "static/upload.html")))))
 
   (define (upload-handler request)
     (define loosie-data
@@ -69,40 +65,12 @@
              (a ([href ,(embed/url home-handler)]) "« Back to home")))))
   
   (define (access-code->url-string code request)
-    (string-append app-url "/" code))
+    (string-append app-url "/l/" code))
   
   (define (home-handler request)
     (render-uploader db request))
 
   (send/suspend/dispatch response-generator))
-
-; upload-formlet: formlet (binding?)
-(define upload-formlet
-  (formlet
-   (div "Passphrase (Optional)" ,{input-string . => . pw}
-        "File to upload" ,{(file-upload) . => . binds})
-   ; (formlet-process upload-formlet request)
-   ; returns the file name and contents:
-   (let* ([hashed-pw (get-password-hash pw)]
-          [fname (bytes->string/utf-8 (binding:file-filename binds))]
-          [mime-type (get-mime-type fname)]
-          [access-code (make-access-code)]
-          [fcontents (binding:file-content binds)])
-     (cond
-       [(equal? fname "") 'no-upload]
-       [(not (or (equal? pw "") (valid-password? pw))) 'invalid-password]
-       [else 
-        (make-loosie #:name            fname
-                     #:mime-type       mime-type
-                     #:content         fcontents
-                     #:access-code     access-code
-                     #:passphrase      hashed-pw
-                     #:pass-protected? (if (equal? pw "") #f #t))]))))
-
-(define passphrase-entry
-  (formlet
-   (div "Enter passphrase to access: " ,{input-string . => . pw})
-   pw))
 
  ; start-upload: request -> doesn't return
 (define (start-upload request)
@@ -152,10 +120,8 @@
 
 
 ; get-content: request -> doesn't return
-(define (get-content request)
+(define (get-content request access-code)
   (define db (init-db))
-  (define access-code
-    (path/param-path (car (url-path (request-uri request)))))
   (define loosie (get-file-data db access-code))
   (if (not loosie) (file-not-found-handler request)
       (match (loosie-pass-protected? loosie)
@@ -163,14 +129,28 @@
         [#t (render-pass-form loosie request)]
         [_ (error "should never get here. if it did then i cri")])))
 
+(define (not-found request)
+  (response/xexpr
+   `(html
+     (head (title "lost in the sauce")
+           (body (h1 "4 Oh 4"))))))
+
+(define (serve-css request filename)
+  (file-response 200 #"OK" filename))
+
 ; dispatches based on request
 (define-values (start reverse-uri)
   (dispatch-rules
    [("") #:method "get" start-upload]
-   [else get-content]))
+   [("static" "css" (string-arg)) serve-css]
+   [("l" (string-arg)) get-content]))
 
 (serve/servlet start
-               #:servlet-path "/"
+               #:server-root-path (current-directory)
+               #:extra-files-paths (list
+                                    (build-path (current-directory) "static" "css"))
+               #:servlet-path ""
                #:servlet-regexp #rx""
+               #:file-not-found-responder not-found
                #:listen-ip #f
                #:port port)

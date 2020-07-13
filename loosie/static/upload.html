@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A sensible file sharer">
+
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="/normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+
+    <title>LOOSIE</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="one-half column" style="margin-top: 25vh">
+          <h1>LOOSIE</h1>
+          <form action="@|(embed/url upload-handler)|" method="POST" enctype="multipart/form-data">
+            @in[f (formlet-display upload-formlet)]{
+            @(xexpr->string f)
+            }
+            <input type="submit" value="upload">
+            <div class="row">
+              <span class="five columns">@|status|</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
