@@ -51,19 +51,17 @@
 
 ; render-upload-success -> doesn't return
 (define (render-upload-success db loosie request)
+  ; renders the success page
   (define (response-generator embed/url)
     (upload-file db loosie)
     (define access-link
       (access-code->url-string
        (loosie-access-code loosie) request))
-    (response/xexpr
-     `(html
-       (head (title "loosie - success"))
-       (body (h1 "Success!")
-             (p "Your link is: " (a ([href 
-                                      ,access-link]) ,access-link))
-             (a ([href ,(embed/url home-handler)]) "« Back to home")))))
-  
+    (response/full
+     200 #f
+     (current-seconds) TEXT/HTML-MIME-TYPE '()
+     (list (string->bytes/utf-8 (include-template "static/success.html")))))
+ 
   (define (access-code->url-string code request)
     (string-append app-url "/l/" code))
   
@@ -78,11 +76,10 @@
   (render-uploader db request))
 
 (define (file-not-found-handler request)
-  (response/xexpr
-   `(html
-     (head (title "loosie not found")
-           (body (h1 "The loosie you requested does not exist")
-                 (p (a ([href "/"]) "« go home")))))))
+  (response/full
+   404 #f
+   (current-seconds) TEXT/HTML-MIME-TYPE '()
+   (list (string->bytes/utf-8 (include-template "static/file-not-found.html")))))
 
 ; displays retrieved loosie
 (define (render-loosie loosie request)
@@ -95,17 +92,10 @@
 
 (define (render-pass-form #:status [status ""] loosie request)
   (define (response-generator embed/url)
-    (response/xexpr 
-     `(html 
-       (head (title "loosie - verify"))
-       (body (h1 "LOOSIE")
-             (form 
-              ([action ,(embed/url password-submit-handler)]
-               [method "POST"]
-               [enctype "multipart/form-data"])
-              ,@(formlet-display passphrase-entry)
-              (input ([type "submit"] [value "Submit"])))
-             (div ([class "status"]) ,status)))))
+    (response/full
+     200 #f
+     (current-seconds) TEXT/HTML-MIME-TYPE '()
+     (list (string->bytes/utf-8 (include-template "static/verify.html")))))
 
   (define (password-submit-handler request)
     (define pw (formlet-process passphrase-entry request))
@@ -130,10 +120,10 @@
         [_ (error "should never get here. if it did then i cri")])))
 
 (define (not-found request)
-  (response/xexpr
-   `(html
-     (head (title "lost in the sauce")
-           (body (h1 "4 Oh 4"))))))
+  (response/full
+   404 #f
+   (current-seconds) TEXT/HTML-MIME-TYPE '()
+   (list (string->bytes/utf-8 (include-template "static/404.html")))))
 
 (define (serve-css request filename)
   (file-response 200 #"OK" filename))

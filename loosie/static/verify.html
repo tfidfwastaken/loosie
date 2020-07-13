@@ -11,18 +11,20 @@
     <link rel="stylesheet" href="/skeleton.css">
     <link rel="stylesheet" href="/user.css">
 
-    <title>LOOSIE</title>
+    <title>LOOSIE - Verify</title>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="two-thirds column" style="margin-top: 25vh">
           <h1>LOOSIE</h1>
-          <form action="@|(embed/url upload-handler)|" method="POST" enctype="multipart/form-data">
-            @in[f (formlet-display upload-formlet)]{
-            @(xexpr->string f)
+          <form action="@|(embed/url password-submit-handler)|" method="POST">
+            @in[f (formlet-display passphrase-entry)]{
+              @(xexpr->string f)
             }
-            <input type="submit" value="upload">
+            <div class="row">
+              <input type="submit" value="Submit">
+            </div>
             <div class="row">
               <span class="five columns">@|status|</span>
             </div>

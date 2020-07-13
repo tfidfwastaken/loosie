@@ -30,5 +30,5 @@
 
 (define passphrase-entry
   (formlet
-   (div "Enter passphrase to access: " ,{input-string . => . pw})
+   (#%# (label "Enter passphrase to access: ") ,{input-string . => . pw})
    pw))

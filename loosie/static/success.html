@@ -11,22 +11,16 @@
     <link rel="stylesheet" href="/skeleton.css">
     <link rel="stylesheet" href="/user.css">
 
-    <title>LOOSIE</title>
+    <title>LOOSIE - Success</title>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="two-thirds column" style="margin-top: 25vh">
-          <h1>LOOSIE</h1>
-          <form action="@|(embed/url upload-handler)|" method="POST" enctype="multipart/form-data">
-            @in[f (formlet-display upload-formlet)]{
-            @(xexpr->string f)
-            }
-            <input type="submit" value="upload">
-            <div class="row">
-              <span class="five columns">@|status|</span>
-            </div>
-          </form>
+          <h1>File uploaded!</h1>
+          <p>Your file sharing link: <br> <a href=@|access-link|>@|access-link|</a></p>
+          <p>Keep this link somewhere safe as it cannot be retrieved again.</p>
+          <div class="row"><a href="@|(embed/url home-handler)|">← Back</a></div>
         </div>
       </div>
     </div>
