@@ -123,7 +123,7 @@
                  pwh))
 
 (define (valid-password? pw)
-  (regexp-match? #px"^[ 0-9A-Za-z!@#$%^&*()]{8,32}$" pw))
+  (regexp-match? #px"^[ 0-9A-Za-z!@#$%^&*()]{6,32}$" pw))
 
 (module+ test
   (test-case
@@ -157,7 +157,7 @@
     (check-true (valid-password? "fast and bulbous"))
     (check-true (valid-password? "#I u5e (em@*$^)!"))
     (check-false (valid-password? "bulbous-also-tapered"))
-    (check-false (valid-password? "2short"))
+    (check-false (valid-password? "short"))
     (check-false (valid-password? "this passphrase is too heccin long"))
     (check-false (valid-password? "nuh/uh"))
     (check-false (valid-password? "passphrasen't"))
