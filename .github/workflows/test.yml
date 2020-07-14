@@ -1,0 +1,26 @@
+on:
+  push:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        racket-variant: ['regular', 'CS']
+    name: Test on ${{ matrix.racket-variant }} Racket
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Install Racket
+        uses: Bogdanp/setup-racket@v0.8
+        with:
+          architecture: 'x64'
+          distribution: 'full'
+          variant: ${{ matrix.racket-variant }}
+      - name: Install Package and its Dependencies
+        run: raco pkg install --auto --batch
+      - name: Run Tests
+        run: raco test -p loosie
