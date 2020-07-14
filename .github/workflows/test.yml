@@ -20,6 +20,7 @@ jobs:
           architecture: 'x64'
           distribution: 'full'
           variant: ${{ matrix.racket-variant }}
+          version: '7.7'
       - name: Install Package and its Dependencies
         run: raco pkg install --auto --batch
       - name: Run Tests
