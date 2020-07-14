@@ -82,10 +82,14 @@
    (list (string->bytes/utf-8 (include-template "static/file-not-found.html")))))
 
 ; displays retrieved loosie
-(define (render-loosie loosie request)
+(define (render-loosie loosie #:password [pw ""] request)
   (define mime-type (loosie-mime-type loosie))
+  (define wrap
+    (read (open-input-bytes (loosie-wrap loosie))))
+  (define enc-content (loosie-content loosie))
+  (define content (decrypt-data enc-content wrap pw))
   (response/output
-   (λ (op) (write-bytes (loosie-content loosie) op))
+   (λ (op) (write-bytes content op))
    #:code 200
    #:mime-type (if (equal? mime-type #"unknown") #""
                    mime-type)))
@@ -101,7 +105,7 @@
     (define pw (formlet-process passphrase-entry request))
     (define pwh (loosie-passphrase loosie))
     (cond
-      [(password-matches? pw pwh) (render-loosie loosie request)]
+      [(password-matches? pw pwh) (render-loosie loosie #:password pw request)]
       [else
        (let ([failed-msg "Verification failed. Try again."])
          (render-pass-form #:status failed-msg loosie request))]))

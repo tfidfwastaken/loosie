@@ -15,6 +15,7 @@
          (schema-out loosie)
          upload-file get-mime-type
          make-access-code get-file-data
+         encrypt-data decrypt-data
          get-password-hash
          password-matches?
          valid-password?)
@@ -29,7 +30,8 @@
    [content binary/f]
    [access-code string/f #:contract non-empty-string? #:unique]
    [passphrase string/f]
-   [pass-protected? boolean/f]))
+   [pass-protected? boolean/f]
+   [wrap binary/f]))
 
 (define (init-db)
  ; make-pg-connection : (-> connection)
@@ -66,7 +68,8 @@
                    #:content         (vector-ref query-vec 3)
                    #:access-code     access-code
                    #:passphrase      (vector-ref query-vec 5)
-                   #:pass-protected? (vector-ref query-vec 6))))
+                   #:pass-protected? (vector-ref query-vec 6)
+                   #:wrap            (vector-ref query-vec 7))))
 
 
 (define (get-mime-type filename)
