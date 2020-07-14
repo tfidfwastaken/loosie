@@ -147,4 +147,5 @@
                #:servlet-regexp #rx""
                #:file-not-found-responder not-found
                #:listen-ip #f
+               #:command-line? #t
                #:port port)

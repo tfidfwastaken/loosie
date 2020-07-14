@@ -1,4 +1,6 @@
-* loosie
+* LOOSIE
+  
+![loosie_mockup](https://user-images.githubusercontent.com/24277692/87395595-3e290800-c5cf-11ea-9ed5-409a6d9a0cc5.png)
 
 Loosie is a convenient on-the-web document sharer.
 
@@ -41,6 +43,7 @@ heroku config:set APP_URL=https://foosie.herokuapp.com
 And in five steps you have setup your own personal file sharing instance!
 
 **** Example instance
-https://loosi.herokuapp.com/ (Currently looks like stale socks because I have not added CSS yet)
+https://loosi.herokuapp.com/ 
 
-Here's an example of a shareable link: https://loosi.herokuapp.com/QdchQBBtVHNr (html version of this readme)
+** A note on privacy
+All the passphrase-protected data stored on a loosie instance is encrypted, and as long as you keep your passphrase a secret, even the instance owner cannot access it. So yes, this service is fairly secure. That said, be cautious when uploading sensitive documents to an instance and make sure you trust the instance owner, as a malicious actor can still host a fork that removes the security features provided in this code.
