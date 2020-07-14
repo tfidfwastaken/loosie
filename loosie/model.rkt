@@ -170,4 +170,12 @@
       "check password verification"
     (check-true
      (password-matches? "a password"
-                        (get-password-hash "a password")))))
+                        (get-password-hash "a password"))))
+
+  (test-case
+      "check encryption and decryption"
+    (define-values (data pw) (values #"s3cr3t d4t4" "some password"))
+    (check-equal?
+     data
+     (let-values ([(enc-data wrap) (encrypt-data data pw)])
+       (decrypt-data enc-data wrap pw)))))
