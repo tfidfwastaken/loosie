@@ -1,6 +1,6 @@
 * LOOSIE
   
-![loosie_mockup](https://user-images.githubusercontent.com/24277692/87395595-3e290800-c5cf-11ea-9ed5-409a6d9a0cc5.png)
+[[https://user-images.githubusercontent.com/24277692/87395595-3e290800-c5cf-11ea-9ed5-409a6d9a0cc5.png]]
 
 Loosie is a convenient on-the-web document sharer.
 
