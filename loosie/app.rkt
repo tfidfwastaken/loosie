@@ -2,6 +2,7 @@
 
 (require racket/list
          racket/file
+         racket/runtime-path
          racket/match
 	 web-server/http
 	 web-server/stuffers
@@ -132,20 +133,19 @@
 (define (serve-css request filename)
   (file-response 200 #"OK" filename))
 
+(define-runtime-path htdocs-path "htdocs")
+
 ; dispatches based on request
 (define-values (start reverse-uri)
   (dispatch-rules
    [("") #:method "get" start-upload]
-   [("static" "css" (string-arg)) serve-css]
    [("l" (string-arg)) get-content]))
 
 (serve/servlet start
-               #:server-root-path (current-directory)
-               #:extra-files-paths (list
-                                    (build-path (current-directory) "static" "css"))
+               #:extra-files-paths (list htdocs-path)
                #:servlet-path ""
                #:servlet-regexp #rx""
                #:file-not-found-responder not-found
                #:listen-ip #f
-               #:command-line? #t
+               #:launch-browser? #f
                #:port port)
