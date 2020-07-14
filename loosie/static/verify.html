@@ -32,5 +32,21 @@
         </div>
       </div>
     </div>
-  </body>
+ 
+    <script>
+function viewPassword() {
+  var passwordInput = document.getElementById('password-field');
+  var passStatus = document.getElementsByClassName('noselect')[0];
+ 
+  if (passwordInput.type == 'password'){
+    passwordInput.type='text';
+    passStatus.style.color='#1D0878';
+  }
+  else{
+    passwordInput.type='password';
+    passStatus.style.color='#111111';
+  }
+}
+    </script>
+ </body>
 </html>

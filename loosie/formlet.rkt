@@ -9,8 +9,16 @@
 ; upload-formlet: formlet (binding?)
 (define upload-formlet
   (formlet
-   (#%# (label "Passphrase (Optional) ") ,{input-string . => . pw}
-        (label "File to upload ") ,{(file-upload) . => . binds})
+   (#%#
+    (label "Passphrase (Optional) ")
+    ,((to-string
+       (required
+        (password-input
+         #:attributes '([autocomplete "new-password"] [id "password-field"]))))
+       . => . pw)
+    (span ([class "noselect"] [onclick "viewPassword()"]) " 👁 ")
+    (label "File to upload ")
+    ,{(file-upload) . => . binds})
    ; (formlet-process upload-formlet request)
    ; returns the file name and contents:
    (let* ([hashed-pw (get-password-hash pw)]
@@ -38,5 +46,11 @@
 
 (define passphrase-entry
   (formlet
-   (#%# (label "Enter passphrase to access: ") ,{input-string . => . pw})
+   (#%# (label "Enter passphrase to access: ")
+    ,((to-string
+       (required
+        (password-input
+         #:attributes '([autocomplete "new-password"] [id "password-field"]))))
+       . => . pw)
+    (span ([class "noselect"] [onclick "viewPassword()"]) " 👁 "))
    pw))
