@@ -15,6 +15,7 @@
          web-server/configuration/responders
          xml
          "model.rkt"
+         "utils.rkt"
          "formlet.rkt")
 
 (module+ test
@@ -84,11 +85,16 @@
 
 ; displays retrieved loosie
 (define (render-loosie loosie #:password [pw ""] request)
-  (define mime-type (loosie-mime-type loosie))
   (define wrap
     (read (open-input-bytes (loosie-wrap loosie))))
   (define enc-content (loosie-content loosie))
-  (define content (decrypt-data enc-content wrap pw))
+  (define-values (content mime-type)
+    (let ([initial-content (decrypt-data enc-content wrap pw)]
+          [initial-mime-type (loosie-mime-type loosie)])
+      (match initial-mime-type
+        [#"text/markdown" (values (markdown/bytes->html/bytes initial-content)
+                                  #"text/html; charset=utf-8")]
+        [_ (values initial-content initial-mime-type)])))
   (response/output
    (λ (op) (write-bytes content op))
    #:code 200

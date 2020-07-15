@@ -3,6 +3,7 @@
 (require web-server/formlets
 	 web-server/http/request-structs
          racket/port
+         "utils.rkt"
          "model.rkt")
 
 (provide upload-formlet passphrase-entry)
