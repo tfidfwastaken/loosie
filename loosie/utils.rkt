@@ -37,7 +37,7 @@
             (link ([rel "stylesheet"] [href "/normalize.css"] [type "text/css"]))
             (link ([rel "stylesheet"] [href "/skeleton.css"] [type "text/css"]))
             (link ([rel "stylesheet"] [href "/user.css"] [type "text/css"])))
-      (body (div ([class "container"])
+      (body (div ([class "container"] [style "margin-top: 3vh"])
                  ,@xexprs)
             (script
              ([src

@@ -9,6 +9,20 @@ body {
     max-width: 650px;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.figure {
+    text-align: center;
+}
+
+.caption {
+    font-weight: 300;
+    font-size: smaller;
+}
+
 p, li {
     font-weight: 500;
 }
