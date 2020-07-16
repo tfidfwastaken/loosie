@@ -11,15 +11,21 @@
 (define upload-formlet
   (formlet
    (#%#
-    (label "Passphrase (Optional) ")
-    ,((to-string
-       (required
-        (password-input
-         #:attributes '([autocomplete "new-password"] [id "password-field"]))))
-       . => . pw)
-    (span ([class "noselect"] [onclick "viewPassword()"]) " 👁 ")
-    (label "File to upload ")
-    ,{(file-upload) . => . binds})
+    (div ([class "row"])
+         (label "Passphrase (Optional) ")
+         ,((to-string
+            (required
+             (password-input
+              #:attributes '([autocomplete "new-password"] [novalidate "novalidate"]
+                             [id "password-field"]
+                             [pattern "^[ 0-9A-Za-z!@#$%^&*()]{6,32}$"]))))
+           . => . pw)
+         (span ([class "noselect"] [onclick "viewPassword()"]) " 👁 "))
+
+    (div ([class "row"])
+         ,{(file-upload #:attributes '([id "file"] [required "required"])) . => . binds}
+         (label ([class "button"] [for "file"]) "Select a File...")))
+
    ; (formlet-process upload-formlet request)
    ; returns the file name and contents:
    (let* ([hashed-pw (get-password-hash pw)]

@@ -1,6 +1,7 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
+    <script>(function(e,t,n){var r=e.querySelectorAll("html")[0];r.className=r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2")})(document,window,0);</script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="A sensible file sharer">
@@ -22,7 +23,7 @@
             }
             <input type="submit" value="upload">
             <div class="row">
-              <span class="five columns">@|status|</span>
+              <span class="five columns" aria-live="polite">@|status|</span>
             </div>
           </form>
         </div>
@@ -43,6 +44,34 @@ function viewPassword() {
     passStatus.style.color='#111111';
   }
 }
+
+var input = document.querySelector('input[type="file"]');
+var label = input.nextElementSibling;
+labelVal = label.innerHTML
+input.addEventListener('change', (e) => {
+  var fileName = '';
+  fileName = e.target.value.split('\\').pop();
+  if(fileName) {
+    label.innerHTML = 'File: ' + fileName;
+    label.style.borderColor = '#4acc1a';
+  } else {
+    label.innerHTML = labelVal;
+    label.style.borderColor = '#888';
+  }
+})
+
+var pw = document.getElementById('password-field');
+pw.addEventListener('change', (e) => {
+  if(pw.validity.tooLong || pw.validity.tooShort) {
+    pw.setCustomValidity("Should be between 6 and 32 characters long");
+    pw.style.borderColor = '#E20003';
+  } else if(pw.validity.patternMismatch) {
+    pw.setCustomValidity("Should be alphabets, numbers or any of: !@"@"#$%^&*()");
+    pw.style.borderColor = '#E20003';
+  } else {
+    pw.setCustomValidity("");
+  }
+});
     </script>
   </body>
 </html>
