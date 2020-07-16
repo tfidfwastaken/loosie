@@ -2,15 +2,16 @@
   
 [[https://github.com/tfidfwastaken/loosie/workflows/.github/workflows/test.yml/badge.svg]]
 
-[[https://user-images.githubusercontent.com/24277692/87395595-3e290800-c5cf-11ea-9ed5-409a6d9a0cc5.png]]
+[[https://user-images.githubusercontent.com/24277692/87672441-98bd9200-c790-11ea-8d73-b57a5dac578d.png]]
 
-Loosie is a convenient on-the-web document sharer.
+Share viewable files /really/ quickly over the web. \\
+No sign-up required.
 
-Just upload an html, plaintext or pdf file and you'll receive a shareable link. These links will display the file directly on the browser without offering a file download (Support for automatic markdown file sharing shall be added later).
+Just upload an html, markdown, plaintext, or pdf document, and get a shareable link that correctly displays the document right in the browser, without being offered a download.
 
-This project is came out of a need of mine where I wanted to quickly share loose html documents as links in a google-drive like fashion.
+This project is came out of a need of mine where I wanted to quickly share loose html documents rendered correctly as links, in a google-drive like fashion.
 
-This has been designed to be self-deployable and I highly recommend using it in a decentralized fashion.
+Loosie is Open Source software and I highly recommend deploying your own instance and using it in a decentralized way.
 
 ** Deploying your own loosie instance
 
@@ -44,11 +45,13 @@ heroku config:set APP_URL=https://foosie.herokuapp.com
 
 And in five steps you have setup your own personal file sharing instance!
 
-**** Example instance
+*** Example instance
 https://loosi.herokuapp.com/ 
 
 Example of a hosted file on my instance: \\
-https://loosi.herokuapp.com/l/Ru9l6q2SpM9z (html version of this readme)
+https://loosi.herokuapp.com/l/Ru9l6q2SpM9z (html version of this readme) 
+
+https://loosi.herokuapp.com/l/kkDRtzcq8Hk5 (markdown version of this readme)
 
 ** A note on privacy
 All the passphrase-protected data stored on a loosie instance is encrypted, and as long as you keep your passphrase a secret, even the instance owner cannot access it. So yes, this service is fairly secure. That said, be cautious when uploading sensitive documents to an instance and make sure you trust the instance owner, as a malicious actor can still host a fork that removes the security features provided in this code.
